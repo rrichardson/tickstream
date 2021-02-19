@@ -1,0 +1,32 @@
+[package]
+name = "tickstream"
+version = "0.1.0"
+authors = ["rrichardson <rick.richardson@gmail.com"]
+edition = "2018"
+
+[dependencies]
+tokio-tungstenite = "0.13.0"
+url = "2.2.1"
+anyhow = "1.0.38"
+serde_json = "1.0.62"
+bytes = "1.0.1"
+futures = "0.3.12"
+futures-util = "0.3.12"
+async-stream = "0.3.0"
+thiserror = "1.0.24"
+
+[dependencies.reqwest]
+features = ["json"]
+version = "0.10.0-alpha.2"
+
+[dependencies.serde]
+features = ["derive"]
+version = "1.0.123"
+
+[dependencies.tokio]
+version = "1.2"
+features = ["rt-multi-thread", "io-util", "net", "macros"]
+
+[dependencies.tokio-util]
+version = "0.6.3"
+features = ["codec"]
