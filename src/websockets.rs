@@ -1,13 +1,14 @@
-use crate::types::{ Subscription, Subscribe, Error };
+use crate::vendor::kraken_rest::{ Subscription, Subscribe };
 use anyhow::{anyhow, Result, Context};
 use futures::{ stream::Stream, SinkExt, StreamExt };
 use serde::de::DeserializeOwned;
 use serde_json;
 use std::marker::PhantomData;
-use futures_util::{pin_mut};
+use futures_util::pin_mut;
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 use async_stream::try_stream;
 use url::Url;
+use backoff::{ ExponentialBackoff, future::retry as backoff_retry };
 
 const REST_URL : &str = "https://api.kraken.com/0/";
 const WS_AUTH_URL : &str = "wss://ws-auth.kraken.com";
@@ -31,10 +32,10 @@ pub async fn subscribe<T: DeserializeOwned + Unpin>(sub: Subscription, private: 
     let s = try_stream! {
         loop {
             if private {
-                let token = Some(get_token("", "").await.context("wat")?);
-                sub_msg.subscription.token = token;
+                let token = backoff_retry(ExponentialBackoff::default(), || async { Ok(get_token("", "").await?) }).await?;
+                sub_msg.subscription.token = Some(token);
             }
-            let (sock, _resp) = connect_async(&url).await.context("failed to connect to remote WS server")?;
+            let (sock, _resp) = backoff_retry(ExponentialBackoff::default(), || async { Ok(connect_async(&url).await.context("failed to connect to remote WS server")?) }).await?;
             let (mut wr, rd) = sock.split();
             let req = serde_json::to_string(&sub_msg)?;
             wr.send(Message::Text(req.into())).await.context("failed to send message")?;

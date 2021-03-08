@@ -1,5 +1,7 @@
-mod types;
-mod websockets;
+pub mod streams;
+pub mod types;
+pub mod vendor;
+pub mod websockets;
 
-pub use types::*;
+pub use vendor::*;
 pub use websockets::*;

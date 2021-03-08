@@ -4,6 +4,14 @@ version = "0.1.0"
 authors = ["rrichardson <rick.richardson@gmail.com"]
 edition = "2018"
 
+[lib]
+name  = "tickstream"
+path = "src/lib.rs"
+
+[[bin]]
+name = "tickstream"
+path = "src/bin/main.rs"
+
 [dependencies]
 tokio-tungstenite = "0.13.0"
 url = "2.2.1"
@@ -14,6 +22,15 @@ futures = "0.3.12"
 futures-util = "0.3.12"
 async-stream = "0.3.0"
 thiserror = "1.0.24"
+bincode = "1.3.2"
+
+[dependencies.fake]
+features = ["derive"]
+version = "2.4.0"
+
+[dependencies.rust_decimal]
+features = ["serde-arbitrary-precision","serde-str"]
+version = "1.10.3"
 
 [dependencies.reqwest]
 features = ["json"]
@@ -30,3 +47,7 @@ features = ["rt-multi-thread", "io-util", "net", "macros"]
 [dependencies.tokio-util]
 version = "0.6.3"
 features = ["codec"]
+
+[dependencies.backoff]
+version = "0.3.0"
+features = ["tokio"]
