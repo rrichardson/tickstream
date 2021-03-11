@@ -92,6 +92,7 @@ fn main() {
 
     assert_eq!(chunks, result);
     println!("success!");
+
     /*
     let book_stream = BookStream<BinanceBase>::start().await?;
     let trade_stream = TradeStream<BinanceBase>::start().await?;

@@ -5,6 +5,8 @@ use serde::{
 };
 use std::fmt;
 
+pub mod websockets;
+
 pub trait StreamDatum {
     const ID: u16;
 }

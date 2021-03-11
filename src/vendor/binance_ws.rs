@@ -1,11 +1,12 @@
+
+use crate::streams::websockets::subscribe;
 use crate::streams::StreamDatum;
+use crate::{BookList, BookUpdate, Platform, Price, Quantity, Trade as TTrade};
+use futures::stream::Stream;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
-
-// mostly for documentation purposes
-type Price = Decimal;
-type Quantity = Decimal;
-type BookList = Vec<(Price, Quantity)>;
+use async_trait::async_trait;
+use anyhow::Result;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct BookTicker {
@@ -122,4 +123,54 @@ pub struct AggregateTrade {
 
 impl StreamDatum for AggregateTrade {
     const ID: u16 = 104;
+}
+
+struct TickPlatform {}
+
+#[async_trait]
+impl Platform for TickPlatform {
+    type BookStream = impl Stream<Item = Result<BookUpdate>>;
+    type TradeStream = impl Stream<Item = Result<TTrade>>;
+
+    async fn start_book_stream(instrument: &'static str) -> Result<Self::BookStream> {
+        let s = subscribe(
+            &"https://blah".into(),
+            "{}".into(),
+            |_b: &BookDepthUpdate| -> Result<BookUpdate> {
+                Ok(BookUpdate {
+                    event: "".into(),
+                    event_time: 0,
+                    symbol: "".into(),
+                    first_update_id: 1,
+                    last_update_id: 2,
+                    bids: vec![(0.into(),0.into())],
+                    asks: vec![(0.into(),0.into())],
+                })
+            },
+        )
+        .await?;
+        Ok(s)
+    }
+
+    async fn start_trade_stream(instrument: &'static str) -> Result<Self::TradeStream> {
+        let s = subscribe(
+            &"https://blah".into(),
+            "{}".into(),
+            |_t: &Trade| -> Result<TTrade> {
+                Ok(TTrade {
+                    event: "".into(),
+                    event_time: 0,
+                    symbol: "".into(),
+                    price: 12.into(),
+                    quantity: 1.into(),
+                    buyer: 1,
+                    seller: 1,
+                    trade_time: 4,
+                    maker: true,
+                })
+            },
+        )
+        .await?;
+        Ok(s)
+    }
 }
